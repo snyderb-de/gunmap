@@ -1,0 +1,11 @@
+{
+  "name": "gunmap",
+  "version": "0.1.0",
+  "description": "using deck.gl to map data",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bryan Snyder",
+  "license": "ISC"
+}
