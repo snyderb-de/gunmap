@@ -15,19 +15,23 @@ A step by step series of examples that tell you how to get a development env run
 
 Setup Git Repo:
 
-```
-
-  *$ git init
-  *$ create .gitignore
-  *$ stage & commit
+```bash
+#!/bin/bash
+  git init
 
 ```
+
+then
+
+- create .gitignore
+- stage & commit
 
 Setup npm & install Webpack:
 
-```
-  *$ npm init
-  *$ npm npm i -D webpack-dev-server webpack webpack-cli
+```bash
+#!/bin/bash
+  npm init
+  npm npm i -D webpack-dev-server webpack webpack-cli
 ```
 
 Create public/index.js
@@ -35,7 +39,7 @@ Create src/index.js
 
 ## Deployment
 
-Add additional notes about how to deploy this on a live system
+coming soon.
 
 ## Built With
 
@@ -43,7 +47,7 @@ Add additional notes about how to deploy this on a live system
 - [webpack](https://webpack.js.org/) - Builder
 - [deck.gl](https://deck.gl/#/) - Data Viz Library
 
-## Markup Template used here:
+## Markup Template used here is from
 
 - **Billie Thompson** - _Initial work_ - [PurpleBooth](https://github.com/PurpleBooth)
 
@@ -53,4 +57,4 @@ IDK what the license is and IDC :)
 
 ## Acknowledgments
 
-- Hat tip to [Fireship.io]()
+- Hat tip to [Fireship.io](https://fireship.io/)
