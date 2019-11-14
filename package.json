@@ -4,7 +4,9 @@
   "description": "using deck.gl to map data",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --output-path ./public",
+    "start": "webpack-dev-server --conent-base ./public --output-path ./public --hot"
   },
   "author": "Bryan Snyder",
   "license": "ISC",
