@@ -19,6 +19,9 @@
     "webpack-dev-server": "^3.9.0"
   },
   "dependencies": {
+    "@deck.gl/aggregation-layers": "^7.3.6",
+    "@deck.gl/google-maps": "^7.3.6",
+    "@deck.gl/layers": "^7.3.6",
     "deck.gl": "^7.3.6"
   }
 }
