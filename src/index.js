@@ -1,8 +1,3 @@
-/* eslint-disable prefer-template */
-/* eslint-disable camelcase */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-
 import { GoogleMapsOverlay } from '@deck.gl/google-maps';
 import { HexagonLayer, HeatmapLayer } from '@deck.gl/aggregation-layers';
 import { ScatterplotLayer } from '@deck.gl/layers';
@@ -34,8 +29,8 @@ const scatterplot = () =>
                 el.innerHTML = `<h1>ID ${incident_id}</h1>`; // incident_id is from the data source and thus why it is not camelcase and also why eslint camel case rules are off for this file
                 el.style.display = 'block';
                 el.style.opacity = 0.9;
-                el.style.left = x + 'px';
-                el.style.top = y + 'px';
+                el.style.left = `${x}px`;
+                el.style.top = `${y}px`;
             } else {
                 el.style.opacity = 0.0;
             }
@@ -80,14 +75,11 @@ const hexagon = () =>
 
 window.initMap = () => {
     const map = new google.maps.Map(document.getElementById('map'), {
-        // orient the map
         center: { lat: 40.0, lng: -100.0 },
         zoom: 5,
-        // bring in the syles from map-styles.js
         styles: mapStyles,
     });
 
-    // add the overlay layers (scatter, heat, and hex)
     const overlay = new GoogleMapsOverlay({
         layers: [scatterplot(), heatmap(), hexagon()],
     });
