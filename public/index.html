@@ -1,28 +1,240 @@
-<!DOCTYPE html>
+<!Doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Gun Violence Data Mapping</title>
+    
+    <!--  project built from webpack creates main.js -->
     <script src="main.js"></script>
-    <script
-      defer
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsnRSkRoDK0I-JIQgiE4kZ9cmF9hx6oPw"
-    ></script>
+
+    <!-- bring in Google Fonts -->
+    <link ref="https://fonts.googleapis.com/css?family=Kanit&display=swap" rel="stylesheet">
+
+    <!-- bring in Google Map -->
+    <script defer
+	    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsnRSkRoDK0I-JIQgiE4kZ9cmF9hx6oPw&callback=initMap">
+    </script>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.4.0/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+        https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.4.0/firebase-analytics.js"></script>
 
     <style>
-      body {
-        margin: 0;
-      }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: black;
+            font-family: 'Kanit', sans-serif;
+            font-size: 16px;
+        }
+        #map {
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
 
-      #map {
-        width: 100vw;
-        height: 100vh;
-      }
+        #tooltips {
+            position: absolute; z-index: 1; pointer-events: none;
+            background: black;
+            color: white;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            padding: 20px;
+            margin: 20px;
+            border-radius: 5px;
+            transition: opacity 250ms ease;
+            max-width: 400px;
+            word-wrap: break-word;
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 40px;
+            left: 30px;
+            display: block;
+            animation-name: dropin;
+            animation-duration: 300ms;
+            animation-timing-function: ease-out;
+            z-index: 2;
+        }
+
+        button {
+            background: #fff;
+            font-size: 1.3em;
+            opacity: 0.85;
+            border-radius: 2px;
+            cursor: pointer;
+            border: none;
+            padding: 0.5em;
+            font-family: 'Kanit', sans-serif;
+            transition: transform 400ms ease-in-out;
+        }
+
+        #filters label {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        #filters {
+            margin-bottom: 20px;
+        }
+
+        a, a:visited { color: #0985bb}
+
+        .about{
+            font-size: 0.6em;
+        }
+
+        button.enabled {
+            background: #3eba3e;
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            transition: transform 400ms ease-in-out;
+        }
+
+        #gun-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 9;
+        }
+
+        #modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            position: relative;
+            animation-name: dropin;
+            animation-duration: 300ms;
+            animation-timing-function: ease-out;
+        }
+        @keyframes dropin {
+            from {left: -100%; opacity: 0}
+            to {left: 0; opacity: 1}
+        }
+
+        #loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            flex-direction: column;
+            background-color: rgba(0,0,0,0.6);
+            color: white;
+            opacity: 0.9;
+            background: black;
+            z-index: 8;
+        }
+
+        #spinner {
+
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #b17c01;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 1s linear infinite;
+            opacity: 0.9;
+
+        }
+        @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+        }
+
+        @media only screen and (max-width: 768px) {
+            body {
+                font-size: 12px;
+            }
+        }
+
+        #filters {
+            display: flex;
+            flex-direction: column;
+            color: white;
+        }
     </style>
-    <title>gunMap</title>
-  </head>
-  <body>
+
+</head>
+<body>
+
+    <!-- loading spinner -->
+    <div id="loading" class="loading">
+    <div id="spinner" class="spinner"></div>
+        <h2>Data is loading...</h2> 
+    </div>
+
+    <!-- laod map -->
     <div id="map"></div>
-  </body>
+
+    <!-- tooltip hovers for point data and link to ind points everything here is done on the scatterplot layer from the project's index.js-->
+    <div id="tooltips"></div>
+
+    <!-- controls, filters and modal container -->
+    <div id="controls">
+
+        <!-- buttons to toggle map layers -->
+        <button title="scatterplot shootings" id="scatter" onclick="updateMap('scatter')">
+            &#x1F691;
+            <div class="about">Shootings</div>
+        </button>
+        <button title="cluster shootings" id="heat" onclick="updateMap('heat')">
+            &#x1F321;
+            <div class="about">Heatmap</div>
+        </button>
+        <button title="danger by square miles" id="hex" onclick="updateMap('hex')">
+            &#x1F3D9;
+            <div class="about">Danger by Square Miles</div> 
+        </button> 
+        <!-- About button will toggle the About Modal -->
+        <button title="About this data" id="modal-button" onclick="toggleModal()">
+            &#x2139;
+            <div class="about">About</div>
+        </button>
+    </div>
+
+
+    <!-- the Modal content -->
+    <div id="gun-modal" onclick="toggleModal()">
+        <div id="modal-content" onclick="event.stopPropagation()">
+            <h1>U.S. Gun Violence Map</h1>
+            <p>☠️ This map contains over <strong>140,000 gun-related incidents</strong> from 1/2013 to 03/2018 that caused injury or death.</p>
+            <p>💾 <a href="https://www.kaggle.com/jameslko/gun-violence-data" target="blank">Data Source</a>. Click on data points to load the full incident reports from <a href="https://www.gunviolencearchive.org/" target="blank">Gun Violence Archive</a>.</p>
+            <hr style="border-top: 1px solid gray;">
+            <p onclick="toggleModal()" style="cursor: pointer;">Close</p>
+        </div>
+    </div>
+
+    <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+        apiKey: "AIzaSyDsnRSkRoDK0I-JIQgiE4kZ9cmF9hx6oPw",
+        authDomain: "gun-violence-map-bi7c01.firebaseapp.com",
+        databaseURL: "https://gun-violence-map-bi7c01.firebaseio.com",
+        projectId: "gun-violence-map-bi7c01",
+        storageBucket: "gun-violence-map-bi7c01.appspot.com",
+        messagingSenderId: "635247532718",
+        appId: "1:635247532718:web:29f2c6e9fb5f112711ab3f",
+        measurementId: "G-W3QLLJNG0D"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+    </script>
+</body>
 </html>
